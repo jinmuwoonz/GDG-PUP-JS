@@ -1,20 +1,22 @@
-// scripts.js
-
-// Example Using a for loop to print numbers 1 to 10
 for (let i = 1; i <= 10; i++) {
   console.log(`Number: ${i}`);
 }
 
-// Using a while loop to print a list of hobbies
-let hobbies = [
-  "Reading", // Example hobby
-  "Writing", // Example hobby
-  // Add more hobbies
+const hobbies = [
+  "Reading",
+  "Writing",
+  "Exercising",
+  "Gaming",
+  "Sleeping",
+  "Eating",
+  "Watching",
+  "Gardening",
+  "Crocheting",
+  "Writing",
 ];
 
-let index = 0;
-while (index < hobbies.length) {
-  // Log each hobby and see if it works in the console
-
-  index++;
+let i = 0;
+while (i < hobbies.length) {
+  console.log(`Hobby ${i + 1}: ${hobbies[i]}`);
+  i++;
 }
