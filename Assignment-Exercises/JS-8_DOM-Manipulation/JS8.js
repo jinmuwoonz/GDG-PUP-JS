@@ -11,6 +11,7 @@ function subtractValue() {
   if (counterValue !== 0) {
     counterValue--;
     updateTextContent();
+  }
 }
 
 function addValue() {
