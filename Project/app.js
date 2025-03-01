@@ -1,167 +1,145 @@
-// app.js
+// DOM Selector
+const winScore = document.getElementById("wins");
+const loseScore = document.getElementById("losses");
+const tieScore = document.getElementById("ties");
+const result = document.getElementById("result");
+const userChoiceImg = document.querySelector("#userChoice .choice--img");
+const computerChoiceImg = document.querySelector(
+  "#computerChoice .choice--img"
+);
+const rock = document.getElementById("rock");
+const paper = document.getElementById("paper");
+const scissors = document.getElementById("scissors");
+const startBtn = document.getElementById("startButton");
+const resetBtn = document.getElementById("resetButton");
 
-// ========== DOM ELEMENTS ==========
-// PS: You can use the getElementById method to grab the elements or use querySelector
-// Grab the Start button element
-let startButton = document.getElementById('startButton') // using getElementById
-let userChoiceDisplay = document.querySelector('#userChoice'); // using querySelector
-let computerChoiceDisplay = // grab the computerChoice id
-let resultDisplay = // grab the result id
-let winsDisplay = // grab the wins id
-let lossesDisplay = // grab the losses id
-let tiesDisplay = // grab the ties id
+// Event Listeners
+rock.addEventListener("click", () => selectingChoice(rock.id));
+paper.addEventListener("click", () => selectingChoice(paper.id));
+scissors.addEventListener("click", () => selectingChoice(scissors.id));
+startBtn.addEventListener("click", () => startGame(userChoice));
+resetBtn.addEventListener("click", () => resetGame());
 
-// ========== GAME STATE VARIABLES ==========
-// Track the state of the game
-let userChoice = ''; // Store the user's choice
+// Variables
+let userChoice = null;
+let computerChoice = null;
+let gameResult = null;
+let userWins = 0;
+let userLoses = 0;
+let userTies = 0;
 
-// Track the score: wins, losses, and ties initialized to 0
-let wins = 0;
-let losses = // initialize losses to 0
-let ties = // initialize ties to 0
-
-let userChoice = ''; // Store the user's choice
-
-// Available choices for the game
-const choices = ['rock', '', ''];
-
-// ========== EVENT LISTENERS ==========
-// add an event listener to rock button in your index.html (e,g, <div id="rock">...</div>)
-document.getElementById('rock').addEventListener('click', () => selectChoice('rock'));
-// add an event listener to paper button in your index.html
-
-// add an event listener to scissors button in your index.html
-
-// add an event listener to the startButton and call the playGame function
-document.getElementById('startButton').addEventListener('click', playGame);
-// add an event listener to the resetButton and call the resetGame function
-document.getElementById('resetButton')
-
-
-// ========== FUNCTIONS ==========
-/**
- * Updates the user's choice and enables the Start button.
- * this function has a parameter "choice"
- */
-function selectChoice(choice) {
-    // Update the user's choice with the selected choice
-    userChoice = choice;
-
-    // Update the user's choice display by adding an image of the choice to the userChoiceDisplay html element
-    userChoiceDisplay.innerHTML = `<img src="./assets/images/icon-${choice}.png" alt="${choice}" class='choice--img'/>`
-
-    // Enable the Start button
-    startButton.disabled = false;
+// Main Functions
+function selectingChoice(choice) {
+  userChoice = choice;
+  startBtn.disabled = false;
+  displayChoices(userChoice, computerChoice);
 }
 
-/**
- * A function that generates a random choice for the computer.
- * this function returns a random choice from the choices array
- * here's the randomizer: Math.floor(Math.random() * choices.length)
- **/
-function getComputerChoice() {
-    // Return a random choice from the 'choices' array
-    const randomIndex = // generate a random index
-    return // return the choice at the random index
+function displayChoices(userChoice, computerChoice) {
+  const imageMap = {
+    rock: "./assets/images/icon-rock.png",
+    paper: "./assets/images/icon-paper.png",
+    scissors: "./assets/images/icon-scissors.png",
+    defaultUser: "./assets/images/icon-user.png",
+    defaultComputer: "./assets/images/icon-computer.png",
+  };
+
+  userChoiceImg.src = imageMap[userChoice] || imageMap.defaultUser;
+  computerChoiceImg.src = imageMap[computerChoice] || imageMap.defaultComputer;
 }
 
+function startGame(userChoice) {
+  computerWeapons = [
+    { id: 1, weapon: "rock" },
+    { id: 2, weapon: "paper" },
+    { id: 3, weapon: "scissors" },
+  ];
 
-/**
- * Determines the winner of the game.
- * this function has two parameters: userChoice and computerChoice
- * this function returns 'win', 'lose', or 'draw'
- */
-function determineWinner(userChoice, computerChoice) {
-    // Add logic to compare choices and return the result
-    // Hint: Use if-else statements
-    if (userChoice === computerChoice) {
-        return 'draw'; // It's a tie
+  const randomGeneratedID = Math.floor(Math.random() * 3) + 1; //use to generate a random ID from 1-3
+  const computerChoiceTemp = computerWeapons.find(
+    (computerChoice) => computerChoice.id === randomGeneratedID
+  ); //finds the generated ID from the computer weapons and stores it as the computer's choice
+  computerChoice = computerChoiceTemp.weapon;
+
+  startBtn.disabled = true;
+  disableChoices(); //disables the choices so user can't click it while determining scores
+  determineScores(userChoice, computerChoice);
+}
+
+function determineScores(userChoice, computerChoice) {
+  const winConditions = {
+    rock: "scissors",
+    paper: "rock",
+    scissors: "paper",
+  };
+
+  if (userChoice === computerChoice) {
+    gameResult = "It's a Tie!";
+    userTies++;
+  } else if (winConditions[userChoice] === computerChoice) {
+    gameResult = "User Wins!";
+    userWins++;
+  } else {
+    gameResult = "Computer Wins!";
+    userLoses++;
+  }
+
+  shortTimer(updateScores);
+}
+
+function shortTimer(callback) {
+  resetBtn.disabled = true; //disables the reset button so user can't click it during the countdown
+  let counter = 3;
+
+  const countdown = setInterval(() => {
+    result.textContent = counter;
+    counter--;
+    if (counter < 0) {
+      clearInterval(countdown);
+      result.textContent = gameResult; //displays the winner after the countdown
+      if (callback) callback(); //calls the function updateScores
+
+      //resets the result text and userchoice/computerchoice images after 2 secs
+      setTimeout(() => {
+        result.textContent = "Choose your weapon!";
+        userChoiceImg.src = "./assets/images/icon-user.png";
+        computerChoiceImg.src = "./assets/images/icon-computer.png";
+        computerChoice = "";
+        gameResult = "";
+        enableChoices(); //enables the choices again
+        resetBtn.disabled = false; //enables the resetbutton
+        clearInterval(backAtTheGame);
+      }, 2000);
     }
-
-    // && is the logical AND operator just like in Python (e.g., if True and False) it returns False because one of the conditions is False
-    // || is the logical OR operator just like in Python  (e.g., if True or False) it returns True because one of the conditions is True
-    else if (
-        (userChoice === 'rock' && computerChoice === 'scissors') ||
-        (userChoice === '' && computerChoice === '') ||
-        (userChoice === '' && computerChoice === '')
-    ) {
-        return // based on the conditions above, what should be returned?
-    } else {
-        return // since it's not a draw or a win, what should be returned?
-    }
+  }, 1000);
 }
 
-/**
- * Updates the score based on the result of the game.
- * this function has a parameter "result"
- */
-function updateScore(result) {
-    // Update the score based on the result
-    if (result === 'win') {
-        wins++; // increment wins by 1, same as wins = wins + 1
-        winsDisplay.textContent = wins; // update the winsDisplay with the new value
-    } else if (result === 'lose') {
-        losses = // increment losses by 1
-        lossesDisplay.textContent = losses; // update the lossesDisplay with the new value
-    } else {
-        // what should be done here?
-    }
+function updateScores() {
+  displayChoices(userChoice, computerChoice); //shows the choices of both the user and computer
+  winScore.textContent = userWins;
+  loseScore.textContent = userLoses;
+  tieScore.textContent = userTies;
 }
 
-
-/**
- * Main game function triggered when the Start button is clicked.
- */
-function playGame() {
-    // Step 1: Get the computer's choice
-    const computerChoice = // call the computer choice function
-
-    // Step 2: Compare the user's choice and the computer's choice
-    const result = // determine the winner (win, lose, draw)
-
-    // Step 3: Update the UI with the computer's choice
-    // Update the computerChoiceDisplay here, similar to the userChoiceDisplay but for the computer
-    computerChoiceDisplay.innerHTML = 
-
-    // Step 4: Display the result of the game (win, lose, draw)
-    // Update the resultDisplay here
-    if (result === 'draw') {
-        resultDisplay.textContent = 'It\'s a Draw!'; // P.S: You can use innerHTML here but textContent is better for just text content
-    } else if (result === 'win') {
-        resultDisplay.textContent = '';
-    } else {
-        resultDisplay.textContent = '';
-    }
-
-    // Step 5: Update the score
-    // Call the updateScore function and pass the result as an argument
-}
-
-
-// Reset the game
+// Sub Functions
 function resetGame() {
-    // Reset the user's choice
-    userChoice = '';
+  userChoice = "";
+  computerChoice = "";
+  userWins = 0;
+  userLoses = 0;
+  userTies = 0;
+  startBtn.disabled = true;
+  updateScores();
+}
 
-    // Reset the userChoiceDisplay to '<img src="./assets/images/icon-user.png" alt="user" class="choice--img">'
-    userChoiceDisplay.innerHTML = '';
+function disableChoices() {
+  rock.style.pointerEvents = "none";
+  paper.style.pointerEvents = "none";
+  scissors.style.pointerEvents = "none";
+}
 
-    // Reset the computerChoiceDisplay to '<img src="./assets/images/icon-computer.png" alt="computer" class="choice--img">';
-    computerChoiceDisplay.innerHTML = '';
-
-    // Reset the resultDisplay to 'Choose your weapon!'
-    resultDisplay.textContent = ''
-
-    // Reset the all score variables to 0
-    wins = 0;
-    // ...
-    // ...
-
-    // Update the score displays
-    winsDisplay.textContent = wins;
-    lossesDisplay.textContent = // update the lossesDisplay with the new value
-    tiesDisplay.textContent = // update the tiesDisplay with the new value
-
-    // Disable the Start button
-    startButton.disabled = true;
+function enableChoices() {
+  rock.style.pointerEvents = "auto";
+  paper.style.pointerEvents = "auto";
+  scissors.style.pointerEvents = "auto";
 }
